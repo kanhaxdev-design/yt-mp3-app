@@ -9,11 +9,34 @@ CORS(app)
 def convert():
     url = request.args.get('url')
     try:
-        with yt_dlp.YoutubeDL({'format': 'bestaudio/best', 'quiet': True, 'cookiefile': 'cookies.txt'}) as ydl:
+        opts = {
+            'quiet': True,
+            'cookiefile': 'cookies.txt',
+            'format': 'worstaudio/worst',
+        }
+        with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
             formats = info.get('formats', [])
-            audio_url = next((f['url'] for f in reversed(formats) if f.get('acodec') != 'none' and f.get('vcodec') == 'none'), info.get('url'))
-            return jsonify({'success': True, 'title': info['title'], 'thumbnail': info.get('thumbnail'), 'audio_url': audio_url})
+            
+            # pick any audio format available
+            audio = None
+            for f in formats:
+                if f.get('acodec') != 'none':
+                    audio = f
+                    break
+            
+            if not audio:
+                audio_url = info.get('url')
+            else:
+                audio_url = audio.get('url')
+
+            return jsonify({
+                'success': True,
+                'title': info['title'],
+                'thumbnail': info.get('thumbnail'),
+                'audio_url': audio_url,
+                'duration': info.get('duration')
+            })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -22,6 +45,5 @@ def health():
     return jsonify({'status': 'running'})
 
 if __name__ == '__main__':
-    import os
-port = int(os.environ.get('PORT', 5000))
-app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
