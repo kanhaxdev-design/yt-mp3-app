@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BeatDrop — YouTube to MP3</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#0a0a0f;
+    --surface:#13131a;
+    --surface2:#1c1c26;
+    --border:#2a2a38;
+    --accent:#7c6af7;
+    --accent2:#5b4fcf;
+    --text:#f0f0f8;
+    --muted:#7a7a9a;
+    --green:#22c97a;
+    --red:#f25c5c;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);}
+  .nav-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;color:var(--text);}
+  .logo-dot{width:10px;height:10px;background:var(--accent);border-radius:50%;}
+  .nav-badge{font-size:11px;background:#1e1b3a;color:var(--accent);padding:3px 10px;border-radius:20px;border:1px solid #3d36a0;}
+
+  /* HERO */
+  .hero{text-align:center;padding:70px 20px 50px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:6px;background:#1e1b3a;color:var(--accent);font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;border:1px solid #3d36a0;margin-bottom:24px;}
+  .hero h1{font-size:52px;font-weight:700;line-height:1.15;margin-bottom:16px;letter-spacing:-1.5px;}
+  .hero h1 span{color:var(--accent);}
+  .hero p{font-size:16px;color:var(--muted);max-width:460px;margin:0 auto 40px;line-height:1.7;}
+
+  /* SEARCH BOX */
+  .search-wrap{max-width:620px;margin:0 auto 16px;}
+  .search-box{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color 0.2s;}
+  .search-box:focus-within{border-color:var(--accent);}
+  .search-icon{padding:0 16px;display:flex;align-items:center;color:var(--muted);}
+  .search-box input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:15px;font-family:'Inter',sans-serif;padding:16px 0;}
+  .search-box input::placeholder{color:var(--muted);}
+  .search-box button{margin:8px;padding:0 24px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s,transform 0.1s;white-space:nowrap;}
+  .search-box button:hover{background:var(--accent2);}
+  .search-box button:active{transform:scale(0.97);}
+  .search-hint{text-align:center;font-size:12px;color:var(--muted);}
+
+  /* STATUS */
+  .status-wrap{max-width:620px;margin:16px auto 0;display:none;}
+  .status-inner{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;}
+  .status-inner.error{border-color:#5a2020;background:#1a0f0f;}
+  .status-inner.success{border-color:#1a4a30;background:#0d1f18;}
+  .spin{animation:spin 1s linear infinite;display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .status-text{font-size:13px;color:var(--muted);}
+  .status-text b{color:var(--text);font-weight:500;}
+
+  /* RESULT CARD */
+  .result-wrap{max-width:620px;margin:20px auto 0;display:none;}
+  .result-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .result-top{display:flex;gap:16px;padding:20px;}
+  .result-thumb{width:110px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--surface2);}
+  .result-info{flex:1;min-width:0;}
+  .result-title{font-size:15px;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .result-meta{font-size:12px;color:var(--muted);display:flex;gap:12px;}
+  .result-meta span{display:flex;align-items:center;gap:4px;}
+  .result-actions{padding:0 20px 20px;display:flex;gap:10px;}
+  .btn-free{flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;}
+  .btn-free:hover{background:#25253a;}
+  .btn-premium{flex:1;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s,transform 0.1s;}
+  .btn-premium:hover{background:var(--accent2);}
+  .btn-premium:active{transform:scale(0.97);}
+
+  /* PLANS */
+  .plans-section{max-width:860px;margin:60px auto;padding:0 20px;}
+  .section-label{text-align:center;font-size:12px;font-weight:600;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;}
+  .section-title{text-align:center;font-size:28px;font-weight:700;margin-bottom:40px;}
+  .plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+  .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;transition:border-color 0.2s;}
+  .plan-card.featured{border-color:var(--accent);background:#13132a;}
+  .plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:4px 14px;border-radius:20px;white-space:nowrap;}
+  .plan-name{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
+  .plan-price{font-size:36px;font-weight:700;margin-bottom:4px;}
+  .plan-price sup{font-size:16px;font-weight:500;vertical-align:super;}
+  .plan-period{font-size:12px;color:var(--muted);margin-bottom:20px;}
+  .plan-features{list-style:none;margin-bottom:24px;}
+  .plan-features li{font-size:13px;color:var(--muted);padding:5px 0;display:flex;align-items:center;gap:8px;}
+  .plan-features li .check{color:var(--green);font-size:15px;}
+  .plan-features li .cross{color:var(--red);font-size:15px;}
+  .plan-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s,transform 0.1s;}
+  .plan-btn:active{transform:scale(0.97);}
+  .plan-btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+  .plan-btn-outline:hover{background:var(--surface2);}
+  .plan-btn-fill{background:var(--accent);border:none;color:#fff;}
+  .plan-btn-fill:hover{background:var(--accent2);}
+
+  /* FEATURES ROW */
+  .features-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;max-width:860px;margin:0 auto 60px;padding:0 20px;}
+  .feat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .feat-icon{font-size:22px;margin-bottom:10px;}
+  .feat-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+  .feat-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+
+  /* PAYMENT MODAL */
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;}
+  .modal-backdrop.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:420px;width:90%;}
+  .modal h3{font-size:20px;font-weight:700;margin-bottom:6px;}
+  .modal p{font-size:13px;color:var(--muted);margin-bottom:24px;}
+  .modal-price{font-size:32px;font-weight:700;color:var(--accent);margin-bottom:24px;}
+  .modal-price span{font-size:14px;color:var(--muted);font-weight:400;}
+  .modal-form input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;margin-bottom:12px;outline:none;}
+  .modal-form input:focus{border-color:var(--accent);}
+  .modal-form input::placeholder{color:var(--muted);}
+  .modal-actions{display:flex;gap:10px;margin-top:8px;}
+  .modal-cancel{flex:1;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;}
+  .modal-pay{flex:2;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+  .modal-pay:hover{background:var(--accent2);}
+
+  /* FOOTER */
+  footer{text-align:center;padding:30px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="logo-dot"></div>
+    BeatDrop
+  </div>
+  <span class="nav-badge">&#9679; Live</span>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">&#9654; YouTube &rarr; MP3 Converter</div>
+  <h1>Download any song<br>as <span>MP3</span> instantly</h1>
+  <p>The fastest way to convert YouTube videos to high-quality MP3. Free or premium — your choice.</p>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <div class="search-icon">&#128279;</div>
+      <input id="urlInput" type="text" placeholder="Paste YouTube link here..." autocomplete="off"/>
+      <button onclick="startConvert()">Convert</button>
+    </div>
+  </div>
+  <p class="search-hint">Supports youtube.com and youtu.be &nbsp;&middot;&nbsp; 128kbps free &nbsp;&middot;&nbsp; 320kbps premium</p>
+
+  <div class="status-wrap" id="statusWrap">
+    <div class="status-inner" id="statusInner">
+      <span id="statusIcon">&#8635;</span>
+      <div class="status-text" id="statusText"></div>
+    </div>
+  </div>
+
+  <div class="result-wrap" id="resultWrap">
+    <div class="result-card">
+      <div class="result-top">
+        <img class="result-thumb" id="resultThumb" src="" alt="thumbnail"/>
+        <div class="result-info">
+          <div class="result-title" id="resultTitle"></div>
+          <div class="result-meta">
+            <span>&#127925; MP3</span>
+            <span id="resultDur"></span>
+          </div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-free" onclick="downloadFree()">&#8681; Free (128kbps)</button>
+        <button class="btn-premium" onclick="openPayment('320kbps')">&#11088; Premium 320kbps — &#8377;9</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="features-row">
+  <div class="feat-card">
+    <div class="feat-icon">&#9889;</div>
+    <div class="feat-title">Lightning fast</div>
+    <div class="feat-desc">Convert in under 10 seconds</div>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon">&#127925;</div>
+    <div class="feat-title">320kbps quality</div>
+    <div class="feat-desc">Crystal clear premium audio</div>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon">&#128274;</div>
+    <div class="feat-title">Secure payments</div>
+    <div class="feat-desc">Razorpay — trusted by millions</div>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon">&#128187;</div>
+    <div class="feat-title">No install needed</div>
+    <div class="feat-desc">Works in any browser</div>
+  </div>
+</div>
+
+<section class="plans-section">
+  <div class="section-label">Pricing</div>
+  <div class="section-title">Simple, honest pricing</div>
+  <div class="plans-grid">
+    <div class="plan-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price"><sup></sup>&#8377;0</div>
+      <div class="plan-period">forever</div>
+      <ul class="plan-features">
+        <li><span class="check">&#10003;</span> Unlimited conversions</li>
+        <li><span class="check">&#10003;</span> 128kbps quality</li>
+        <li><span class="cross">&#10007;</span> 320kbps HD audio</li>
+        <li><span class="cross">&#10007;</span> No ads</li>
+      </ul>
+      <button class="plan-btn plan-btn-outline" onclick="document.getElementById('urlInput').focus()">Get started free</button>
+    </div>
+    <div class="plan-card featured">
+      <div class="plan-badge">&#11088; Most popular</div>
+      <div class="plan-name">Per track</div>
+      <div class="plan-price"><sup>&#8377;</sup>9</div>
+      <div class="plan-period">per download</div>
+      <ul class="plan-features">
+        <li><span class="check">&#10003;</span> 320kbps HD quality</li>
+        <li><span class="check">&#10003;</span> No ads</li>
+        <li><span class="check">&#10003;</span> Priority speed</li>
+        <li><span class="check">&#10003;</span> Instant download</li>
+      </ul>
+      <button class="plan-btn plan-btn-fill" onclick="openPayment('320kbps')">Pay &#8377;9 &rarr;</button>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name">Monthly</div>
+      <div class="plan-price"><sup>&#8377;</sup>49</div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-features">
+        <li><span class="check">&#10003;</span> Unlimited 320kbps</li>
+        <li><span class="check">&#10003;</span> No ads ever</li>
+        <li><span class="check">&#10003;</span> Batch download</li>
+        <li><span class="check">&#10003;</span> Priority support</li>
+      </ul>
+      <button class="plan-btn plan-btn-outline" onclick="openPayment('monthly')">Subscribe &rarr;</button>
+    </div>
+  </div>
+</section>
+
+<!-- Payment Modal -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal">
+    <h3 id="modalTitle">Premium Download</h3>
+    <p id="modalDesc">Get 320kbps HD quality for this track</p>
+    <div class="modal-price" id="modalPrice">&#8377;9 <span>one-time</span></div>
+    <div class="modal-form">
+      <input type="text" id="payName" placeholder="Your name" autocomplete="name"/>
+      <input type="email" id="payEmail" placeholder="Email for receipt" autocomplete="email"/>
+      <input type="tel" id="payPhone" placeholder="Phone number (optional)" autocomplete="tel"/>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="document.getElementById('modalBackdrop').classList.remove('open')">Cancel</button>
+      <button class="modal-pay" onclick="triggerRazorpay()">Pay with Razorpay &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2026 BeatDrop &nbsp;&middot;&nbsp; Payments secured by Razorpay &nbsp;&middot;&nbsp; Only download content you own
+</footer>
+
+<script>
+let currentAudioUrl = '';
+let currentTitle = '';
+let currentPlan = '320kbps';
+let currentAmount = 900;
+
+async function startConvert() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { showStatus('error', 'Paste a YouTube link first.'); return; }
+  if (!/youtube\.com|youtu\.be/.test(url)) { showStatus('error', 'Not a valid YouTube link.'); return; }
+
+  showStatus('loading', 'Converting your track...');
+  document.getElementById('resultWrap').style.display = 'none';
+
+  try {
+    const res = await fetch('http://localhost:5000/convert?url=' + encodeURIComponent(url));
+    const data = await res.json();
+    if (data.error) { showStatus('error', data.error); return; }
+
+    currentAudioUrl = data.audio_url;
+    currentTitle = data.title;
+
+    document.getElementById('resultThumb').src = data.thumbnail || '';
+    document.getElementById('resultTitle').textContent = data.title;
+    const mins = data.duration ? Math.floor(data.duration/60) + ':' + String(data.duration%60).padStart(2,'0') : '';
+    document.getElementById('resultDur').textContent = mins ? '&#9679; ' + mins : '';
+
+    document.getElementById('statusWrap').style.display = 'none';
+    document.getElementById('resultWrap').style.display = 'block';
+  } catch(e) {
+    showStatus('error', 'Cannot reach server. Make sure backend is running on port 5000.');
+  }
+}
+
+function showStatus(type, msg) {
+  const wrap = document.getElementById('statusWrap');
+  const inner = document.getElementById('statusInner');
+  const icon = document.getElementById('statusIcon');
+  const text = document.getElementById('statusText');
+  wrap.style.display = 'block';
+  inner.className = 'status-inner' + (type === 'error' ? ' error' : type === 'success' ? ' success' : '');
+  icon.className = type === 'loading' ? 'spin' : '';
+  icon.textContent = type === 'loading' ? '↻' : type === 'error' ? '✕' : '✓';
+  text.innerHTML = '<b>' + (type === 'loading' ? 'Converting...' : type === 'error' ? 'Error' : 'Done') + '</b> ' + msg;
+}
+
+function downloadFree() {
+  if (!currentAudioUrl) return;
+  const a = document.createElement('a');
+  a.href = currentAudioUrl;
+  a.download = (currentTitle || 'audio') + '.mp3';
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function openPayment(plan) {
+  currentPlan = plan;
+  currentAmount = plan === 'monthly' ? 4900 : 900;
+  document.getElementById('modalTitle').textContent = plan === 'monthly' ? 'Monthly Premium' : 'Premium Download';
+  document.getElementById('modalDesc').textContent = plan === 'monthly' ? 'Unlimited 320kbps downloads every month' : 'Get 320kbps HD quality for this track';
+  document.getElementById('modalPrice').innerHTML = '&#8377;' + (currentAmount/100) + ' <span>' + (plan === 'monthly' ? '/month' : 'one-time') + '</span>';
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalBackdrop'))
+    document.getElementById('modalBackdrop').classList.remove('open');
+}
+
+function triggerRazorpay() {
+  const name = document.getElementById('payName').value.trim() || 'Customer';
+  const email = document.getElementById('payEmail').value.trim() || 'customer@example.com';
+  const phone = document.getElementById('payPhone').value.trim() || '9999999999';
+
+  const options = {
+    key: 'YOUR_RAZORPAY_KEY_ID',  // 🔑 Replace with your Razorpay Key ID
+    amount: currentAmount,
+    currency: 'INR',
+    name: 'BeatDrop',
+    description: currentPlan === 'monthly' ? 'Monthly Premium Plan' : 'Premium MP3 Download',
+    prefill: { name, email, contact: phone },
+    theme: { color: '#7c6af7' },
+    handler: function(response) {
+      document.getElementById('modalBackdrop').classList.remove('open');
+      alert('Payment successful! ID: ' + response.razorpay_payment_id + '\nYour 320kbps download is starting...');
+      downloadFree(); // In production: call your backend to verify + serve 320kbps
+    },
+    modal: { ondismiss: function(){ console.log('Payment dismissed'); } }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
+}
+
+document.getElementById('urlInput').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') startConvert();
+});
+</script>
+</body>
+</html>
