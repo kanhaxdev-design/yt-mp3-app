@@ -9,7 +9,7 @@ CORS(app)
 def convert():
     url = request.args.get('url')
     try:
-        with yt_dlp.YoutubeDL({'format': 'bestaudio', 'quiet': True, 'cookiefile': 'cookies.txt'}) as ydl:
+        with yt_dlp.YoutubeDL({'format': 'bestaudio/best', 'quiet': True, 'cookiefile': 'cookies.txt'}) as ydl:
             info = ydl.extract_info(url, download=False)
             formats = info.get('formats', [])
             audio_url = next((f['url'] for f in reversed(formats) if f.get('acodec') != 'none' and f.get('vcodec') == 'none'), info.get('url'))
