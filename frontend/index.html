@@ -278,7 +278,7 @@ async function startConvert() {
   document.getElementById('resultWrap').style.display = 'none';
 
   try {
-    const res = await fetch('http://localhost:5000/convert?url=' + encodeURIComponent(url));
+    const res = await fetch('https://yt-mp3-app-chi.vercel.app/convert?url=' + encodeURIComponent(url));
     const data = await res.json();
     if (data.error) { showStatus('error', data.error); return; }
 
@@ -340,7 +340,7 @@ function triggerRazorpay() {
   const phone = document.getElementById('payPhone').value.trim() || '9999999999';
 
   const options = {
-    key: 'YOUR_RAZORPAY_KEY_ID',  // 🔑 Replace with your Razorpay Key ID
+    key: 'rzp_test_T5Zd1BTKFZX8TK',  // 🔑 Replace with your Razorpay Key ID
     amount: currentAmount,
     currency: 'INR',
     name: 'BeatDrop',
