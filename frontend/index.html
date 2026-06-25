@@ -278,7 +278,7 @@ async function startConvert() {
   document.getElementById('resultWrap').style.display = 'none';
 
   try {
-    const res = await fetch('https://yt-mp3-app-chi.vercel.app/convert?url=' + encodeURIComponent(url));
+    const res = await fetch('https://yt-mp3-app.onrender.com/convert?url=' + encodeURIComponent(url));
     const data = await res.json();
     if (data.error) { showStatus('error', data.error); return; }
 
